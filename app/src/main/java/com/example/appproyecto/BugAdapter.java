@@ -95,7 +95,4 @@ public class BugAdapter extends RecyclerView.Adapter<BugAdapter.ViewHolder> {
     }
 
 
-
-
-
 }
