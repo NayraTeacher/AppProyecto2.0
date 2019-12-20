@@ -10,6 +10,9 @@ public class Bug {
 
     public static String[] estados = {"Abierto", "Procesando", "Cerrado"};
 
+    public Bug(){
+        //Para el listener
+    }
     public Bug(int code, String title, String fecha, String descripcion, String adjunto, int estado){
         this.code = code;
         this.title = title;

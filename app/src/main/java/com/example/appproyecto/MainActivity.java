@@ -14,12 +14,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private BugAdapter mAdapter;
     private RecyclerView recyclerViewBugs;
+    List<Bug> found = new ArrayList<>();
+
+    private Query mListBug;
+    private ChildEventListener childEventListener;
+    private ValueEventListener valueEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,13 +49,59 @@ public class MainActivity extends AppCompatActivity {
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         recyclerViewBugs.setHasFixedSize(true);
+        
+
+        mListBug = FirebaseDatabase.getInstance().getReference()
+                .child("bugs").orderByChild("code");
+        childEventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+                //Refrescar lista
+                refrescar();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+                //Refrescar lista
+                refrescar();
+            }
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+                //Refrescar lista
+                refrescar();
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                //Refrescar lista
+                refrescar();
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        mListBug.addChildEventListener(childEventListener);
+
+        valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                found.clear();
+                for (DataSnapshot bugsSnapshot: dataSnapshot.getChildren()) {
+                    found.add(bugsSnapshot.getValue(Bug.class));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        };
+        mListBug.addValueEventListener(valueEventListener);
+
         // specify an adapter with the list to show
-        mAdapter = new BugAdapter(this, getData());
+        mAdapter = new BugAdapter(this, found);
         recyclerViewBugs.setAdapter(mAdapter);
-
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -76,32 +135,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private List<Bug> getData(){
-        List<Bug> found = new ArrayList<>();
-        Bug onebug = null;
-        BugsDB dbase = new BugsDB(this,
-                "soporte", null, BugsDB.DATABASE_VERSION);
-        SQLiteDatabase bd = dbase.getWritableDatabase();
-        Cursor fila = bd.rawQuery("select code, title, fecha, descripcion, adjunto, estado " +
-                "from bugs", null);
-        if (fila.moveToFirst()) {
-            onebug = new Bug(fila.getInt(0),fila.getString(1),fila.getString(2),
-                    fila.getString(3),fila.getString(4), fila.getInt(5));
-            found.add(onebug);
-            while(fila.moveToNext()){
-                onebug = new Bug(fila.getInt(0),fila.getString(1),fila.getString(2),
-                        fila.getString(3),fila.getString(4), fila.getInt(5));
-                found.add(onebug);
-            }
-        }
-        bd.close();
-
-        return found;
-    }
-
     private void nuevo(){
+        int seq = 0;
+        if (found.size() > 0)
+            seq = found.get(found.size()-1).code+1;
         Intent i = new Intent(this, BugEdition.class);
-        i.putExtra("code", -1);
+        i.putExtra("code", seq);
         startActivity(i);
     }
 
@@ -109,16 +148,12 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
     private void refrescar(){
-        mAdapter.setBugList(getData());
+        mAdapter.setBugList(found);
         mAdapter.notifyDataSetChanged();
         Context context = getApplicationContext();
         Toast.makeText(context, "Elementos cargados: "+mAdapter.getItemCount(), Toast.LENGTH_SHORT).show();
     }
 
-    private void editar(int position){
-        Intent i = new Intent(this, BugEdition.class);
-        i.putExtra("code", position);
-        startActivity(i);
-    }
+
 
 }

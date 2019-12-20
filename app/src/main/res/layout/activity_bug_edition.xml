@@ -13,12 +13,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingTop="@dimen/cardview_compat_inset_shadow">
+
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
@@ -38,9 +40,10 @@
                         android:text="Fecha" />
 
                 </TableRow>
+
                 <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
+                    android:layout_height="match_parent">
 
                     <TextView
                         android:id="@+id/textView"
@@ -55,8 +58,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="10"
-                        android:inputType="textPersonName"
-                        android:hint="Titulo" />
+                        android:hint="Titulo"
+                        android:inputType="textPersonName" />
                 </TableRow>
 
                 <TableRow
@@ -80,9 +83,11 @@
                         android:inputType="textMultiLine" />
 
                 </TableRow>
+
                 <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
+                    android:layout_height="match_parent">
+
                     <TextView
                         android:id="@+id/textView4"
                         style="@style/Etiquetas"
@@ -96,9 +101,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
                 </TableRow>
+
                 <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
+                    android:layout_height="match_parent">
 
                     <TextView
                         android:id="@+id/textView6"
@@ -113,9 +119,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="10"
-                        android:inputType="textPersonName"
-                        android:hint="Adjunto" />
+                        android:hint="Adjunto"
+                        android:inputType="textPersonName" />
                 </TableRow>
+
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -127,18 +134,30 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="TextView"
-                        android:visibility="invisible" />
+                        android:visibility="invisible" /><![CDATA[
 
-                    <Button
-                        android:id="@+id/button2"
-                        style="@style/Etiquetas"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:onClick="guardar"
-                        android:text="guardar" />
                     />
+                ]]>
                 </TableRow>
             </TableLayout>
+
+            <Button
+                android:id="@+id/button2"
+                style="@style/Etiquetas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="guardar"
+                android:text="guardar" />
+
+            <Button
+                android:id="@+id/button"
+                style="@style/Etiquetas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="atras"
+                android:text="ATRAS" />
+
         </LinearLayout>
     </ScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

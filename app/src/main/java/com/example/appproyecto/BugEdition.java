@@ -15,8 +15,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -28,6 +31,8 @@ public class BugEdition extends AppCompatActivity {
     private TextView code, fecha, adjunto;
 
     private DatabaseReference mDatabase;
+    private DatabaseReference mBug;
+    private ValueEventListener eventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,15 +62,24 @@ public class BugEdition extends AppCompatActivity {
             }
         });
 
-        clearBug();
-
         Bundle bundle = getIntent().getExtras();
         int codigo = bundle.getInt("code");
-        if (codigo > -1){
-            Bug b = searchBug(codigo);
-            if (b != null)
-                loadBug(b);
-        }
+        clearBug(codigo);
+        mBug = FirebaseDatabase.getInstance().getReference()
+                    .child("bugs").child(String.valueOf(codigo));
+        eventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Bug found = dataSnapshot.getValue(Bug.class);
+                if (found != null)
+                    loadBug(found);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                }
+            };
+        mBug.addValueEventListener(eventListener);
 
     }
 
@@ -86,31 +100,9 @@ public class BugEdition extends AppCompatActivity {
         int c = Integer.parseInt(code.getText().toString());
         Bug mybug = new Bug(c, title.getText().toString(), fecha.getText().toString(),
                 description.getText().toString(), adjunto.getText().toString(), sestados.getSelectedItemPosition());
-        guardarBug(mybug);
-    }
-
-
-    private void guardarBug(Bug nuevo){
-        mDatabase.child("bugs").child(String.valueOf(nuevo.code)).setValue(nuevo);
+        mDatabase.child("bugs").child(String.valueOf(mybug.code)).setValue(mybug);
         Toast.makeText(this,"Datos guardados", Toast.LENGTH_SHORT).show();
-    }
 
-
-    private Bug searchBug(int code){
-        Bug found = null;
-        BugsDB dbase = new BugsDB(this,
-                "soporte", null, BugsDB.DATABASE_VERSION);
-        SQLiteDatabase bd = dbase.getWritableDatabase();
-        Cursor fila = bd.rawQuery("select title, fecha, descripcion, adjunto, estado " +
-                "from bugs where code='" + code + "'", null);
-        if (fila.moveToFirst()) {
-            found = new Bug(code,fila.getString(0),fila.getString(1),
-                    fila.getString(2),fila.getString(3), fila.getInt(4));
-
-        }
-        bd.close();
-
-        return found;
     }
 
     private void loadBug(Bug b){
@@ -121,12 +113,19 @@ public class BugEdition extends AppCompatActivity {
         sestados.setSelection(b.estado);
         adjunto.setText(b.adjunto);
     }
-    private void clearBug(){
-        code.setText("-1");
+    private void clearBug(int c){
+        code.setText(String.valueOf(c));
         title.setText("");
         fecha.setText(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
         description.setText("");
         sestados.setSelection(0);
         adjunto.setText("not apply");
+    }
+
+    public void atras(View v){
+        try {
+            mBug.removeEventListener(eventListener);
+            finish();
+        }catch (Exception e){}
     }
 }
